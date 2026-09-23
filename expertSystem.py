@@ -53,42 +53,7 @@ class ExpertSystem:
         while diferencia < -180:
             diferencia += 360
         return diferencia
-    
-    def segmentoinicio(self, xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia):
-        # Giro a la DERECHA (diferencia positiva)
-        if diferencia > 5:
-            if diferencia > 20:
-                x = 0.5
-                y = 0.5
-            elif diferencia > 15:
-                x = 1
-                y = 0.3
-            else:
-                x = 2
-                y = 0.1
-        # Giro a la izquierda (diferencia negativa)
-        elif diferencia < -5:
-            if diferencia < -20:
-                x = 0.5
-                y = -0.5
-            elif diferencia < -15:
-                x = 1
-                y = -0.3
-            else:
-                x = 2
-                y = -0.1
-        # Alineado con el objetivo (avanza recto)
-        else:
-            x = 3
-            y = 0
 
-        # 2. Comprobación de estado según la distancia al objetivo inicial
-        if distancia_objetivo <= 1.0:
-            estado_inicio = False
-        else:
-            estado_inicio = True
-        return x, y, estado_inicio
-    
     def distancia_inicial(self, xiniobj, xrobot, yiniobj, yrobot):
         difx = xiniobj - xrobot
         dify = yiniobj - yrobot 
@@ -96,29 +61,22 @@ class ExpertSystem:
         angulo_objetivo = math.degrees(math.atan2(dify, difx))
         return difx, dify, distancia_objetivo, angulo_objetivo
 
+#SEGEMTNOOOOO -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·
 
-    def distancia_final(self, xfinobj, xrobot, yfinobj, yrobot):
-        difx = xfinobj - xrobot
-        dify = yfinobj - yrobot 
-        distancia_objetivo = abs(difx)+abs(dify)
-        angulo_objetivo = math.degrees(math.atan2(dify, difx))
-        return difx, dify, distancia_objetivo, angulo_objetivo
-    
-    def segmentofinal(self, xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia):
-
-        #diferencia positiva: giro positivo
-        if diferencia > 1:
+    def segmentoinicio(self, xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia):
+        # Giro a la DERECHA (diferencia positiva)
+        if diferencia > 2:
             if diferencia > 15:
                 x = 0.5
-                y = +0.5
+                y = 0.5
             elif diferencia > 10:
                 x = 1
-                y = +0.3
+                y = 0.3
             else:
                 x = 2
-                y = +0.1
+                y = 0.1
         # Giro a la izquierda (diferencia negativa)
-        elif diferencia < -1:
+        elif diferencia < -2:
             if diferencia < -15:
                 x = 0.5
                 y = -0.5
@@ -132,8 +90,54 @@ class ExpertSystem:
         else:
             x = 3
             y = 0
-        return x, y
 
+        # 2. Comprobación de estado según la distancia al objetivo inicial
+        if distancia_objetivo <= 5:
+            estado_inicio = False
+            x = 0
+        else:
+            estado_inicio = True
+        return x, y, estado_inicio
+    
+    def distancia_final(self, xfinobj, xrobot, yfinobj, yrobot):
+        difx = xfinobj - xrobot
+        dify = yfinobj - yrobot 
+        distancia_objetivo = abs(difx)+abs(dify)
+        angulo_objetivo = math.degrees(math.atan2(dify, difx))
+        return difx, dify, distancia_objetivo, angulo_objetivo
+    
+    def segmentofinal(self, xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia):
+
+            #diferencia positiva: giro positivo
+            if diferencia > 2:
+                if diferencia > 15:
+                    x = 0.5
+                    y = 0.5
+                elif diferencia > 10:
+                    x = 1
+                    y = 0.3
+                else:
+                    x = 2
+                    y = 0.1
+            # diferencia negativa: giro negativo)
+            elif diferencia < -2:
+                if diferencia < -15:
+                    x = 0.5
+                    y = -0.5
+                elif diferencia < -10:
+                    x = 1
+                    y = -0.3
+                else:
+                    x = 2
+                    y = -0.1
+            # Linea recta
+            else:
+                x = 3
+                y = 0
+            if distancia_objetivo <= 5:
+                x = 0
+            return x, y
+#-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·
 
     def tomarDecision(self, poseRobot):
         x , y = 0 , 0 #Inicializamos las variables a cero por si acaso
@@ -161,7 +165,7 @@ class ExpertSystem:
                 #Calculamos la distancia a la que estamos del punto
                 difx, dify, distancia_objetivo, angulo_objetivo = self.distancia_inicial(xiniobj, xrobot, yiniobj, yrobot)
                 print(angulo_objetivo)
-
+                
                 #Ahora lo que queremos es calcular la diferencia
                 # (Angulo objetivo le restamos nuestra orientacion, y asi obtenemos lo que debe girar nuestro robot)
                 diferencia = self.calculo_diferencia(angulo_objetivo, orientacion)
@@ -206,42 +210,7 @@ class ExpertSystem:
         #para girar en sentido horario hay que usar el menos, por lo que el angulo bueno (el ue queremos en 360), hay que pillar el resto de dividir entre 360:
         # ejemplo -- 0 grados mira hacia arriba, 180 abajo, 360 arriba otra vez, por lo que lo reseteamos a 0, pero tenemos que calcular como que el 0 esta igual de cerca del 270 que del 90, por lo que if orientacion
 
-"""
-inicio_obj = self.objetivoActual.getInicio()
-        xiniobj = inicio_obj[0]
-        yiniobj = inicio_obj[1]
-        #Primero orientarse, cuando esta alineado con el objetivo avance
-    
-        difx = xiniobj - xrobot
-        dify = yiniobj - yrobot 
-        print(difx+dify)
-        #girar robot hasta alinearse con el punto
-        angulo = self.funcionangulo(difx, dify)
-        estado_inicio = True
-        #INICIO
-        while self.orientarse and (orientacion >=angulo + 10 or orientacion <= angulo - 10):
-            #ver a que lado debe girarse:
-            #if derecha:
-            x = 2
-            y = -0.75
-            #if izquierda:
-            x = 2
-            y = 0.75
-            if (poseRobot[2] <= angulo +10) or (poseRobot[2] >= angulo -10):
-                self.orientarse = False
+    #DUDAS
 
-        #Girar derecha
-        if poseRobot[2] >= (angulo-5):
-            x = 2
-            y = -0.3
-        #Girar izquierda
-        if poseRobot[2] <= angulo+5:
-            x = 2
-            y = 0.3
-        
-        if abs(difx)+abs(dify)<= 0.25:
-            estado_inicio = False
-            self.orientarse = True
-            """
-# - siempre se alterna segmento, triangulo?
-#   pueden haber dos trozos separados (el circuito es todo conectado o hay saltos?)
+        # - siempre se alterna segmento, triangulo?
+        #   pueden haber dos trozos separados (el circuito es todo conectado o hay saltos?)
