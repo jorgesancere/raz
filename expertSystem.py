@@ -54,7 +54,7 @@ class ExpertSystem:
             diferencia += 360
         return diferencia
 
-    def distancia_inicial(self, xiniobj, xrobot, yiniobj, yrobot):
+    def distancia(self, xiniobj, xrobot, yiniobj, yrobot):
         difx = xiniobj - xrobot
         dify = yiniobj - yrobot 
         distancia_objetivo = abs(difx)+abs(dify)
@@ -63,28 +63,28 @@ class ExpertSystem:
 
 #SEGEMTNOOOOO -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·
 
-    def segmentoinicio(self, xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia):
+    def iraobjetivo(self, xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia):
         # Giro a la DERECHA (diferencia positiva)
-        if diferencia > 2:
+        if diferencia > 0.5:
             if diferencia > 15:
-                x = 0.5
+                x = 1
                 y = 0.5
             elif diferencia > 10:
-                x = 1
+                x = 2
                 y = 0.3
             else:
-                x = 2
+                x = 3
                 y = 0.1
         # Giro a la izquierda (diferencia negativa)
-        elif diferencia < -2:
+        elif diferencia < -0.5:
             if diferencia < -15:
-                x = 0.5
+                x = 1
                 y = -0.5
             elif diferencia < -10:
-                x = 1
+                x = 2
                 y = -0.3
             else:
-                x = 2
+                x = 3
                 y = -0.1
         # Alineado con el objetivo (avanza recto)
         else:
@@ -92,51 +92,10 @@ class ExpertSystem:
             y = 0
 
         # 2. Comprobación de estado según la distancia al objetivo inicial
-        if distancia_objetivo <= 5:
-            estado_inicio = False
+        if distancia_objetivo <= 2:
+            self.estado_inicio = not self.estado_inicio
             x = 0
-        else:
-            estado_inicio = True
-        return x, y, estado_inicio
-    
-    def distancia_final(self, xfinobj, xrobot, yfinobj, yrobot):
-        difx = xfinobj - xrobot
-        dify = yfinobj - yrobot 
-        distancia_objetivo = abs(difx)+abs(dify)
-        angulo_objetivo = math.degrees(math.atan2(dify, difx))
-        return difx, dify, distancia_objetivo, angulo_objetivo
-    
-    def segmentofinal(self, xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia):
-
-            #diferencia positiva: giro positivo
-            if diferencia > 2:
-                if diferencia > 15:
-                    x = 0.5
-                    y = 0.5
-                elif diferencia > 10:
-                    x = 1
-                    y = 0.3
-                else:
-                    x = 2
-                    y = 0.1
-            # diferencia negativa: giro negativo)
-            elif diferencia < -2:
-                if diferencia < -15:
-                    x = 0.5
-                    y = -0.5
-                elif diferencia < -10:
-                    x = 1
-                    y = -0.3
-                else:
-                    x = 2
-                    y = -0.1
-            # Linea recta
-            else:
-                x = 3
-                y = 0
-            if distancia_objetivo <= 5:
-                x = 0
-            return x, y
+        return x, y
 #-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·
 
     def tomarDecision(self, poseRobot):
@@ -147,9 +106,6 @@ class ExpertSystem:
 
         #Calculamos el tipo de recorrido (1 segmento, 2 triangulo)
         tipo = self.tipo_recorrido()
-    
-        tipo = 1 #TEMPORAL, hasta conseguir usar el triangulo
-
 
         if tipo  == 1:
             #SEGMENTO
@@ -163,16 +119,14 @@ class ExpertSystem:
                 yiniobj = inicio_obj[1]
 
                 #Calculamos la distancia a la que estamos del punto
-                difx, dify, distancia_objetivo, angulo_objetivo = self.distancia_inicial(xiniobj, xrobot, yiniobj, yrobot)
-                print(angulo_objetivo)
+                difx, dify, distancia_objetivo, angulo_objetivo = self.distancia(xiniobj, xrobot, yiniobj, yrobot)
                 
                 #Ahora lo que queremos es calcular la diferencia
                 # (Angulo objetivo le restamos nuestra orientacion, y asi obtenemos lo que debe girar nuestro robot)
                 diferencia = self.calculo_diferencia(angulo_objetivo, orientacion)
-                print(diferencia)
 
                 
-                x, y, self.estado_inicio = self.segmentoinicio(xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia)
+                x, y= self.iraobjetivo(xrobot, yrobot, orientacion, inicio_obj, xiniobj, yiniobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia)
 
 
             #Ahora nos limitamos a llegar al final del segmento
@@ -183,25 +137,46 @@ class ExpertSystem:
                 yfinobj = fin_obj[1]
 
                 #Calculamos la distancia a la que estamos del punto
-                difx, dify, distancia_objetivo, angulo_objetivo = self.distancia_final(xfinobj, xrobot, yfinobj, yrobot)
+                difx, dify, distancia_objetivo, angulo_objetivo = self.distancia(xfinobj, xrobot, yfinobj, yrobot)
                 difx = xfinobj - xrobot
                 dify = yfinobj - yrobot 
                 distancia_objetivo = abs(difx)+abs(dify)
                 angulo_objetivo = math.degrees(math.atan2(dify, difx))
-                print(angulo_objetivo)
 
                 #Obtenemos la diferencia
                 diferencia = self.calculo_diferencia(angulo_objetivo, orientacion)
-                print(diferencia)
 
-                x, y = self.segmentofinal(xrobot, yrobot, orientacion, fin_obj, xfinobj, yfinobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia)
+                x, y= self.iraobjetivo(xrobot, yrobot, orientacion, fin_obj, xfinobj, yfinobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia)
 
             #Calculamos el angulo al que deberia situarse el robot para alinearse con el objetivo
             
         else:
-            print()
-            #Sabemos que se trata de un triangulo
-        
+            #TRIANGULO
+            if self.estado_inicio == True:
+                medio_obj = self.objetivoActual.getMedio()
+                xmedioobj = medio_obj[0]
+                ymedioobj = medio_obj[1]
+                #Calculamos la distancia a la que estamos del punto
+                difx, dify, distancia_objetivo, angulo_objetivo = self.distancia(xmedioobj, xrobot, ymedioobj, yrobot)
+                difx = xmedioobj - xrobot
+                dify = ymedioobj - yrobot 
+                distancia_objetivo = abs(difx)+abs(dify)
+                angulo_objetivo = math.degrees(math.atan2(dify, difx))
+                diferencia = self.calculo_diferencia(angulo_objetivo, orientacion)
+                x, y = self.iraobjetivo(xrobot, yrobot, orientacion, medio_obj, xmedioobj, ymedioobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia)
+            else:
+                fin_obj = self.objetivoActual.getFin()
+                xfinobj = fin_obj[0]
+                yfinobj = fin_obj[1]
+                #Calculamos la distancia a la que estamos del punto
+                difx, dify, distancia_objetivo, angulo_objetivo = self.distancia(xfinobj, xrobot, yfinobj, yrobot)
+                difx = xfinobj - xrobot
+                dify = yfinobj - yrobot 
+                distancia_objetivo = abs(difx)+abs(dify)
+                angulo_objetivo = math.degrees(math.atan2(dify, difx))
+                diferencia = self.calculo_diferencia(angulo_objetivo, orientacion)
+                x, y = self.iraobjetivo(xrobot, yrobot, orientacion, fin_obj, xfinobj, yfinobj, difx, dify, distancia_objetivo, angulo_objetivo, diferencia)
+        print(round(poseRobot[0], 2), round(poseRobot[1], 2))
         return x, y
     
     #NOTAS
@@ -213,4 +188,5 @@ class ExpertSystem:
     #DUDAS
 
         # - siempre se alterna segmento, triangulo?
-        #   pueden haber dos trozos separados (el circuito es todo conectado o hay saltos?)
+        #   pueden haber dos trozos separados (el circuito es todo conectado o hay saltos?) 
+        #Se puede meter por dentro del triangulo?
