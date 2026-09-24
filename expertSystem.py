@@ -67,10 +67,10 @@ class ExpertSystem:
         # Giro a la DERECHA (diferencia positiva)
         if diferencia > 0.5:
             if diferencia > 15:
-                x = 1
+                x = 2
                 y = 0.5
             elif diferencia > 10:
-                x = 2
+                x = 2.5
                 y = 0.3
             else:
                 x = 3
@@ -78,10 +78,10 @@ class ExpertSystem:
         # Giro a la izquierda (diferencia negativa)
         elif diferencia < -0.5:
             if diferencia < -15:
-                x = 1
+                x = 2
                 y = -0.5
             elif diferencia < -10:
-                x = 2
+                x = 2.5
                 y = -0.3
             else:
                 x = 3
